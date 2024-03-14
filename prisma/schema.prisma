@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Persona {
+  id              Int      @id @default(autoincrement())
+  nombres         String?
+  primerApellido  String?
+  segundoApellido String?
+  nroDocumento    Int      @unique
+  fechaNac        DateTime
+  usuario         Usuario?
+}
+
+model Usuario {
+  id         Int         @id @default(autoincrement())
+  login      Int         @unique
+  password   String
+  personaId  Int         @unique
+  rolId      Int         @default(1)
+  Estudiante Estudiante?
+  persona    Persona     @relation(fields: [personaId], references: [id])
+}
+
+model Estudiante {
+  id        Int      @id @default(autoincrement())
+  entregas  Entrega?
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId Int      @unique
+}
+
+model Tarea {
+  id          Int       @id @default(autoincrement())
+  titulo      String
+  descripcion String?
+  fechaIni    DateTime?
+  fechaFin    DateTime?
+  estado      Int       @default(1)
+  entrega     Entrega?
+  estadoRel   Estado    @relation(fields: [estado], references: [valor])
+}
+
+model Entrega {
+  id           Int         @id @default(autoincrement())
+  calificacion Int?
+  tareaId      Int         @unique
+  estudianteId Int         @unique
+  documentos   Documento[]
+  estudiante   Estudiante  @relation(fields: [estudianteId], references: [id])
+  tarea        Tarea       @relation(fields: [tareaId], references: [id])
+}
+
+model Documento {
+  id          Int     @id @default(autoincrement())
+  descripcion String?
+  tipo        String?
+  contenido   String
+  entregaId   Int
+  entrega     Entrega @relation(fields: [entregaId], references: [id])
+}
+
+model Estado {
+  id          Int     @id @default(autoincrement())
+  descripcion String
+  valor       Int     @unique
+  Tarea       Tarea[]
+}

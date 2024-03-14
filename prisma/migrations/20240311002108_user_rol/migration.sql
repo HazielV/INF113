@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Usuario" ADD COLUMN     "rolId" INTEGER NOT NULL DEFAULT 1;
