@@ -6,13 +6,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
+import { updateEntrega } from '@/lib/actions'
+import { Button } from '@/components/ui/button'
+import { useFormStatus } from 'react-dom'
+import Footer from './footer'
 interface props {
   tareaId: number
+  entregaId: number
   html: string
   css: string
   javascript: string
 }
-export default function Editar({ tareaId, html, css, javascript }: props) {
+export default function Editar({
+  tareaId,
+  entregaId,
+  html,
+  css,
+  javascript,
+}: props) {
   const router = useRouter()
   const [datos, setDatos] = useState({
     html: html,
@@ -30,19 +41,9 @@ export default function Editar({ tareaId, html, css, javascript }: props) {
       [name]: valor,
     }))
   }
-  const subir = (e: FormEvent) => {
-    e.preventDefault()
-    axios
-      .put('http://localhost:3000/api/entregas', {
-        ...datos,
-      })
-      .then((data) => {
-        document.getElementById('editar-trigger')?.click()
-        router.refresh()
-      })
-      .catch(function (error) {
-        console.log(error)
-      })
+  async function formAction(datosForm: FormData) {
+    await updateEntrega(datosForm)
+    document.getElementById(`editar-trigger-${tareaId}`)?.click()
   }
   return (
     <Tabs defaultValue="html" className="w-full">
@@ -51,7 +52,21 @@ export default function Editar({ tareaId, html, css, javascript }: props) {
         <TabsTrigger value="CSS">CSS</TabsTrigger>
         <TabsTrigger value="javascript">JavaScript</TabsTrigger>
       </TabsList>
-      <form id="subir_entrega" onSubmit={subir}>
+      <form id="subir_entrega" action={formAction}>
+        <input
+          name="tareaId"
+          type="number"
+          hidden
+          readOnly
+          defaultValue={tareaId}
+        />
+        <input
+          name="entregaId"
+          type="number"
+          hidden
+          readOnly
+          defaultValue={entregaId}
+        />
         <TabsContent value="html">
           <div className=" flex flex-col gap-3">
             <Label htmlFor="html" className="">
@@ -98,6 +113,9 @@ export default function Editar({ tareaId, html, css, javascript }: props) {
             />
           </div>
         </TabsContent>
+        <div className="mt-3 w-full flex justify-end">
+          <Footer />
+        </div>
       </form>
     </Tabs>
   )

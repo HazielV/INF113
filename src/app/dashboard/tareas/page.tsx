@@ -3,8 +3,6 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -35,6 +33,7 @@ async function getData() {
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
+
     throw new Error('Failed to fetch data')
   }
 
@@ -98,12 +97,6 @@ export default async function Tareas() {
               </DialogTitle>
             </DialogHeader>
             <Create />
-
-            <DialogFooter>
-              <Button form="subir_entrega" type="submit">
-                Guardar
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
@@ -130,72 +123,81 @@ export default async function Tareas() {
             </div>
             {/* actions */}
             <div>
-              {entregas.map((entre, index) => (
-                <Fragment key={index}>
-                  {entre.tareaId === elem.id ? (
-                    <Dialog>
-                      <DialogTrigger id="editar-trigger" asChild>
-                        <Button variant="default" className="text-xs">
-                          Editar
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="w-11/12 max-w-3xl ">
-                        <DialogHeader>
-                          <DialogTitle className="first-letter:uppercase">
-                            {elem.titulo}
-                          </DialogTitle>
-                        </DialogHeader>
-                        <Editar
-                          tareaId={elem.id}
-                          html={
-                            entre.documentos.find(
-                              (docu) => docu.tipo === 'HTML'
-                            )?.contenido || ''
-                          }
-                          css={
-                            entre.documentos.find((docu) => docu.tipo === 'css')
-                              ?.contenido || ''
-                          }
-                          javascript={
-                            entre.documentos.find(
-                              (docu) => docu.tipo === 'javascript'
-                            )?.contenido || ''
-                          }
-                        />
-
-                        <DialogFooter>
-                          <Button form="subir_entrega" type="submit">
-                            Guardar
+              {entregas.length === 0 ? (
+                <Dialog>
+                  <DialogTrigger id="entregar-trigger" asChild>
+                    <Button variant="outline" className="text-xs">
+                      Entregar
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="w-11/12 max-w-3xl ">
+                    <DialogHeader>
+                      <DialogTitle className="first-letter:uppercase">
+                        {elem.titulo}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <Entregar tareaId={elem.id} />
+                  </DialogContent>
+                </Dialog>
+              ) : (
+                entregas.map((entre, index) => (
+                  <Fragment key={index}>
+                    {entre.tareaId === elem.id && (
+                      <Dialog>
+                        <DialogTrigger id={`editar-trigger-${elem.id}`} asChild>
+                          <Button variant="default" className="text-xs">
+                            Editar
                           </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  ) : (
-                    <Dialog>
-                      <DialogTrigger id="entregar-trigger" asChild>
-                        <Button variant="outline" className="text-xs">
-                          Entregar
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="w-11/12 max-w-3xl ">
-                        <DialogHeader>
-                          <DialogTitle className="first-letter:uppercase">
-                            {elem.titulo}
-                          </DialogTitle>
-                        </DialogHeader>
-                        <Entregar tareaId={elem.id} />
-
-                        <DialogFooter>
-                          <Button form="subir_entrega" type="submit">
-                            Guardar
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  )}
-                </Fragment>
-              ))}
-
+                        </DialogTrigger>
+                        <DialogContent className="w-11/12 max-w-3xl ">
+                          <DialogHeader>
+                            <DialogTitle className="first-letter:uppercase">
+                              {elem.titulo}
+                            </DialogTitle>
+                          </DialogHeader>
+                          <Editar
+                            entregaId={entre.id}
+                            tareaId={elem.id}
+                            html={
+                              entre.documentos.find(
+                                (docu) => docu.tipo === 'HTML'
+                              )?.contenido || ''
+                            }
+                            css={
+                              entre.documentos.find(
+                                (docu) => docu.tipo === 'css'
+                              )?.contenido || ''
+                            }
+                            javascript={
+                              entre.documentos.find(
+                                (docu) => docu.tipo === 'javascript'
+                              )?.contenido || ''
+                            }
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </Fragment>
+                ))
+              )}
+              {entregas.length > 0 &&
+                !entregas.find((entre) => entre.tareaId === elem.id) && (
+                  <Dialog>
+                    <DialogTrigger id="entregar-trigger" asChild>
+                      <Button variant="outline" className="text-xs">
+                        Entregar
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="w-11/12 max-w-3xl ">
+                      <DialogHeader>
+                        <DialogTitle className="first-letter:uppercase">
+                          {elem.titulo}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <Entregar tareaId={elem.id} />
+                    </DialogContent>
+                  </Dialog>
+                )}
               {elem.estadoRel?.valor === 2 && (
                 <Button variant="default" className="text-xs pl-3 ">
                   <svg

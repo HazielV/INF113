@@ -8,12 +8,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
-import axios from 'axios'
-import { useRouter } from 'next/navigation'
+import { createTarea } from '@/lib/actions'
+import Footer from './footer'
 export default function Create() {
-  const router = useRouter()
   const [date, setDate] = useState<Date>()
   const [dateF, setDateF] = useState<Date>()
   const [datos, setDatos] = useState({
@@ -33,24 +33,13 @@ export default function Create() {
     }))
   }
 
-  const subir = (e: FormEvent) => {
-    const data = { ...datos, fechaIni: date, fechaFin: dateF }
-    e.preventDefault()
-    axios
-      .post('http://localhost:3000/api/tareas', {
-        ...data,
-      })
-      .then((data) => {
-        document.getElementById('trigger')?.click()
-
-        router.refresh()
-      })
-      .catch(function (error) {
-        console.log(error)
-      })
+  async function formAction(datosForm: FormData) {
+    await createTarea(datosForm)
+    document.getElementById('editar-trigger')?.click()
   }
+
   return (
-    <form id="subir_entrega" onSubmit={subir}>
+    <form id="subir_entrega" action={formAction}>
       <div className=" flex flex-col gap-3">
         <Label htmlFor="titulo" className="">
           Titulo
@@ -77,6 +66,20 @@ export default function Create() {
           placeholder="descripcion"
         />
       </div>
+      <input
+        name="fechaIni"
+        type="text"
+        hidden
+        value={date?.toISOString()}
+        readOnly
+      />
+      <input
+        name="fechaFin"
+        type="text"
+        hidden
+        value={dateF?.toISOString()}
+        readOnly
+      />
       <div className="flex gap-10 w-full">
         <div className=" flex flex-col gap-3 mt-4 w-full">
           <Label htmlFor="descripcion" className="">
@@ -156,6 +159,9 @@ export default function Create() {
             </PopoverContent>
           </Popover>
         </div>
+      </div>
+      <div className="mt-3 w-full flex justify-end">
+        <Footer />
       </div>
     </form>
   )

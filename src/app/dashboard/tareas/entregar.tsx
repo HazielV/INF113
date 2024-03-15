@@ -4,13 +4,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ChangeEvent, FormEvent, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import axios from 'axios'
+import { createEntrega } from '@/lib/actions'
+import Footer from './footer'
+
 interface props {
   tareaId: number
 }
 export default function Entregar({ tareaId }: props) {
-  const router = useRouter()
   const [datos, setDatos] = useState({
     html: '',
     css: '',
@@ -27,7 +27,7 @@ export default function Entregar({ tareaId }: props) {
       [name]: valor,
     }))
   }
-  const subir = (e: FormEvent) => {
+  /*   const subir = (e: FormEvent) => {
     e.preventDefault()
     axios
       .post('http://localhost:3000/api/entregas', {
@@ -40,8 +40,9 @@ export default function Entregar({ tareaId }: props) {
       .catch(function (error) {
         console.log(error)
       })
-    console.log('valor', datos)
-  }
+    console.log('valor', datos) 
+  }*/
+
   return (
     <Tabs defaultValue="html" className="w-full">
       <TabsList className="">
@@ -49,7 +50,14 @@ export default function Entregar({ tareaId }: props) {
         <TabsTrigger value="CSS">CSS</TabsTrigger>
         <TabsTrigger value="javascript">JavaScript</TabsTrigger>
       </TabsList>
-      <form id="subir_entrega" onSubmit={subir}>
+      <form id="subir_entrega" action={createEntrega}>
+        <input
+          name="tareaId"
+          type="number"
+          hidden
+          readOnly
+          defaultValue={tareaId}
+        />
         <TabsContent value="html">
           <div className=" flex flex-col gap-3">
             <Label htmlFor="html" className="">
@@ -96,6 +104,9 @@ export default function Entregar({ tareaId }: props) {
             />
           </div>
         </TabsContent>
+        <div className="mt-3 w-full flex justify-end">
+          <Footer />
+        </div>
       </form>
     </Tabs>
   )

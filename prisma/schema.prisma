@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
 model Persona {
@@ -29,10 +29,10 @@ model Usuario {
 }
 
 model Estudiante {
-  id        Int      @id @default(autoincrement())
-  entregas  Entrega?
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
-  usuarioId Int      @unique
+  id        Int       @id @default(autoincrement())
+  entregas  Entrega[]
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId Int       @unique
 }
 
 model Tarea {
@@ -42,15 +42,15 @@ model Tarea {
   fechaIni    DateTime?
   fechaFin    DateTime?
   estado      Int       @default(1)
-  entrega     Entrega?
+  entrega     Entrega[]
   estadoRel   Estado    @relation(fields: [estado], references: [valor])
 }
 
 model Entrega {
   id           Int         @id @default(autoincrement())
   calificacion Int?
-  tareaId      Int         @unique
-  estudianteId Int         @unique
+  tareaId      Int
+  estudianteId Int
   documentos   Documento[]
   estudiante   Estudiante  @relation(fields: [estudianteId], references: [id])
   tarea        Tarea       @relation(fields: [tareaId], references: [id])
