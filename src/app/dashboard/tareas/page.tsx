@@ -15,6 +15,7 @@ import Editar from './edit'
 import { Fragment } from 'react'
 import { unstable_noStore } from 'next/cache'
 import { useRouter } from 'next/navigation'
+import { getActionEntregas, getActionTareas } from '@/lib/actions'
 interface TareaEstado extends Tarea {
   estadoRel: Estado
 }
@@ -22,42 +23,19 @@ interface EntregaDocus extends Entrega {
   documentos: Documento[]
 }
 async function getData() {
-  const res = await fetch('http://localhost:3000/api/tareas', {
-    method: 'GET',
-    next: { revalidate: 0 },
-    headers: { Cookie: cookies().toString() },
-  })
+  const res = await getActionTareas()
 
-  // The return value is *not* serialized
-  // You can return Date, Map, Set, etc.
-
-  if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-
-    throw new Error('Failed to fetch data')
-  }
-
-  return res.json()
+  return res
 }
 async function getEntregas() {
-  const res = await fetch('http://localhost:3000/api/entregas', {
-    method: 'GET',
-    next: { revalidate: 0 },
-    headers: { Cookie: cookies().toString() },
-  })
-  if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-
-    throw new Error('Failed to fetch data')
-  }
-
-  return res.json()
+  const res = await getActionEntregas()
+  return res
 }
 
 export default async function Tareas() {
   unstable_noStore()
-  const tareas: TareaEstado[] = await getData()
-  const entregas: EntregaDocus[] = await getEntregas()
+  const tareas: TareaEstado[] = (await getData()) as TareaEstado[]
+  const entregas = (await getEntregas()) as EntregaDocus[]
   const cookieStore = cookies()
   const sesion = cookieStore.get('rolId')
 

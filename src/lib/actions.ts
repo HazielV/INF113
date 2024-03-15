@@ -52,6 +52,58 @@ interface userData {
   rol: number
   iat: number
 }
+export async function getActionTareas() {
+  const prisma = new PrismaClient()
+  let salida = [] as Tarea[]
+  try {
+    const tareas = await prisma.tarea.findMany()
+    salida = tareas
+  } catch (error) {
+    return []
+  }
+  revalidatePath('/dashboard/tareas')
+  return salida
+}
+
+export async function getActionEntregas() {
+  const prisma = new PrismaClient()
+  const token = cookies().get('sesion')
+
+  if (token && token.value) {
+    const dataUser = Jwt.verify(token.value, clave) as userData
+
+    if (dataUser && dataUser.login) {
+      const usuario = await prisma.usuario.findUnique({
+        where: {
+          login: dataUser.login,
+        },
+      })
+
+      const estudiante = await prisma.estudiante.findUnique({
+        where: {
+          usuarioId: usuario?.id,
+        },
+      })
+
+      if (estudiante) {
+        const entregas = await prisma.entrega.findMany({
+          where: {
+            estudianteId: estudiante?.id,
+          },
+          select: {
+            id: true,
+            documentos: true,
+            calificacion: true,
+            tareaId: true,
+          },
+        })
+        revalidatePath('/dashboard/tareas')
+        return entregas
+      }
+    }
+  }
+  return []
+}
 export async function updateEntrega(formData: FormData) {
   const prisma = new PrismaClient()
   interface dataEntrega {
